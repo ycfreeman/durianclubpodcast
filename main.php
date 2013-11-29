@@ -1,18 +1,20 @@
 <?php
 
-//require 'api_cache/API_cache.php';
-//
-//$cache_file = 'durianclub.json';
-//$api_call = 'http://4eb.org.au/views/ajax?tid=12&view_name=episodes&view_display_id=page_1&view_args=%3FGlobal%3DAll&view_path=ondemand&view_base_path=ondemand&view_dom_id=1&pager_element=0';
-//$cache_for = 5; // cache results for five minutes
-//
-//$api_cache = new API_cache ($api_call, $cache_for, $cache_file);
-//if (!$res = $api_cache->get_api_cache())
-//    $res = '{"error": "Could not load cache"}';
-//
-//ob_start();
-//echo $res;
-$json = file_get_contents('http://4eb.org.au/views/ajax?tid=12&view_name=episodes&view_display_id=page_1&view_args=%3FGlobal%3DAll&view_path=ondemand&view_base_path=ondemand&view_dom_id=1&pager_element=0');
+require 'api_cache/API_cache.php';
+
+$cache_file = 'durianclub.json';
+$api_call = 'http://4eb.org.au/views/ajax?tid=12&view_name=episodes&view_display_id=page_1&view_args=%3FGlobal%3DAll&view_path=ondemand&view_base_path=ondemand&view_dom_id=1&pager_element=0';
+$cache_for = 5; // cache results for five minutes
+
+$api_cache = new API_cache ($api_call, $cache_for, $cache_file);
+if (!$res = $api_cache->get_api_cache())
+    $res = '{"error": "Could not load cache"}';
+
+ob_start();
+echo $res;
+$json = ob_get_clean();
+
+//$json = file_get_contents('http://4eb.org.au/views/ajax?tid=12&view_name=episodes&view_display_id=page_1&view_args=%3FGlobal%3DAll&view_path=ondemand&view_base_path=ondemand&view_dom_id=1&pager_element=0');
 
 $split = explode("Chinese show aired Saturday night", $json);
 $split2 = explode("\\x3c", $split[1]);
@@ -29,7 +31,7 @@ $responseJson = json_encode($response);
  */
 
 header('Cache-Control: no-cache, must-revalidate');
-//header('Expires: ' . $api_cache->get_expires_datetime());
+header('Expires: '.$api_cache->get_expires_datetime());
 //header ('Content-length: ' . strlen($responseJson));
 
 //header('content-type: application/json; charset=utf-8');
@@ -72,6 +74,5 @@ if (is_valid_callback($_GET['callback']))
 header('status: 400 Bad Request', true, 400);
 
 
-?>
 
 
