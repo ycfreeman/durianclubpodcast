@@ -12,8 +12,36 @@
 //
 //ob_start();
 //echo $res;
-$json = file_get_contents('http://4eb.org.au/views/ajax?tid=12&view_name=episodes&view_display_id=page_1&view_args=%3FGlobal%3DAll&view_path=ondemand&view_base_path=ondemand&view_dom_id=1&pager_element=0');
+$apiPath = "http://4eb.org.au/views/ajax";
+$paramsFm = [
+    'tid' => '12',
+    'pager_element' => '0',
+    'view_name' => '4eb_on_demand',
+    'view_display_id' => 'page_4eb_ondemand',
+    'view_args' => '?Global=All',
+    'view_path' => '4eb-ondemand',
+    'view_base_path' => '4eb-ondemand',
+];
 
+$ch = curl_init();
+
+curl_setopt($ch, CURLOPT_URL, $apiPath);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS,
+    http_build_query($paramsFm));
+
+
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$server_output = curl_exec($ch);
+
+curl_close($ch);
+
+echo $server_output;
+
+//$json = @file_get_contents($apiPath);
+//
+//echo $json;
 /**
  * search for "Chinese show aired Saturday night"
  */
