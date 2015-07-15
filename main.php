@@ -1,69 +1,89 @@
 <?php
 
-//require 'api_cache/API_cache.php';
-//
-//$cache_file = 'durianclub.json';
-//$api_call = 'http://4eb.org.au/views/ajax?tid=12&view_name=episodes&view_display_id=page_1&view_args=%3FGlobal%3DAll&view_path=ondemand&view_base_path=ondemand&view_dom_id=1&pager_element=0';
-//$cache_for = 5; // cache results for five minutes
-//
-//$api_cache = new API_cache ($api_call, $cache_for, $cache_file);
-//if (!$res = $api_cache->get_api_cache())
-//    $res = '{"error": "Could not load cache"}';
-//
-//ob_start();
-//echo $res;
-$apiPath = "http://4eb.org.au/views/ajax";
-$paramsFm = [
-    'tid' => '12',
-    'pager_element' => '0',
-    'view_name' => '4eb_on_demand',
-    'view_display_id' => 'page_4eb_ondemand',
-    'view_args' => '?Global=All',
-    'view_path' => '4eb-ondemand',
-    'view_base_path' => '4eb-ondemand',
+define("CACHE_KEY", "durianclubpodcast");
+define("EXPIRY", 86400);
+$CHANNELS = [
+    "durianclub" => [
+        "name" => "Durian Club",
+        "otherName" => "榴槤俱樂部",
+        "channel" => "4eb",
+        "day" => "saturday",
+        "startTime" => "2230"
+    ],
+    "digitalchat" => [
+        "name" => "Digital Chat",
+        "otherName" => "數碼講",
+        "channel" => "4eb-d",
+        "day" => "saturday",
+        "startTime" => "1930"
+    ]
 ];
 
-$ch = curl_init();
+$memcache = new Memcache;
+//$memcache->delete(CACHE_KEY);
 
-curl_setopt($ch, CURLOPT_URL, $apiPath);
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS,
-    http_build_query($paramsFm));
+$responseJson = $memcache->get(CACHE_KEY);
 
+if ($responseJson === false) {
 
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    ini_set('default_socket_timeout', 2);
 
-$server_output = curl_exec($ch);
+    function transformChannel(DateTime $date, array $hash)
+    {
+        $year = $date->format("Y");
+        $month = $date->format("m");
+        $day = $date->format("d");
+        return [
+            $hash["channel"],
+            $year,
+            $month,
+            $day,
+            $hash["startTime"]
+        ];
+    }
 
-curl_close($ch);
+    function channelResponse(array $hash)
+    {
+        $urlTemplate = "http://media.emit.com/%s/chinese/%s%s%s%s/aac_mid.m4a";
 
-echo $server_output;
+        if (array_key_exists("day", $hash)) {
+            $date = new DateTime('@' . strtotime("previous " . $hash["day"]));
+        } else {
+            $date = new DateTime();
+        }
+        $podcasts = [];
 
-//$json = @file_get_contents($apiPath);
-//
-//echo $json;
-/**
- * search for "Chinese show aired Saturday night"
- */
+        for ($i = 0; $i < 5; $i++) {
+            $currDate = $date->modify("-$i week");
+            $url = vsprintf($urlTemplate, transformChannel($currDate, $hash));
+            $headers = get_headers($url, 1);
+            if (strpos(implode("", $headers), "200 OK") !== false) {
+                $podcasts[] = [
+                    "date" => $currDate->format("D d M Y"),
+                    "m4a" => $url
+                ];
+            } else {
+                continue;
+            }
+        }
 
-$split = explode("Chinese show aired Saturday night", $json);
+        return [
+            "name" => $hash["name"],
+            "otherName" => $hash["otherName"],
+            "podcasts" => $podcasts
+        ];
+    }
 
-/**
- * search for "\\x3c"
- */
-$split2 = explode("\\x3c", $split[1]);
+    $responses = [];
+    foreach ($CHANNELS as $key => $value) {
+        $responses[$key] = channelResponse($value);
+    }
+    $responseJson = json_encode($responses);
 
+    $memcache->set(CACHE_KEY, $responseJson);
 
-/**
- * look for match http:// * .m4a lines
- */
-$pattern = '/http:\/\/.*.m4a/';
-preg_match($pattern, $split[1], $matches);
+}
 
-
-$response = array('date' => trim($split2[0]), 'm4a' => trim($matches[0]));
-
-$responseJson = json_encode($response);
 
 /**
  * { date: $split2[0], m4a: $matches[0]}
@@ -73,7 +93,7 @@ header('Cache-Control: no-cache, must-revalidate');
 //header('Expires: ' . $api_cache->get_expires_datetime());
 //header ('Content-length: ' . strlen($responseJson));
 header("access-control-allow-origin: *");
-header('Content-Type: application/javascript');
+header('Content-Type: application/json');
 
 
 function is_valid_callback($subject)
