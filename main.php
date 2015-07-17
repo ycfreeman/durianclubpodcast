@@ -4,6 +4,7 @@ define("CACHE_KEY", "durianclubpodcast");
 define("EXPIRY", 86400);
 define("LONG_EXPIRY", 604800);
 define("CHANNEL_QUERYSTRING", "channel");
+define("DIVIDER", "___");
 $CHANNELS = [
     "durianclub" => [
         "name" => "Durian Club",
@@ -26,13 +27,11 @@ $get_with_lowercase_keys = array_combine(
 );
 $memcache = new Memcache;
 $getChannel = $get_with_lowercase_keys["channel"];
-$requestCacheKey = CACHE_KEY . $get_with_lowercase_keys["channel"];
+$requestCacheKey = CACHE_KEY . DIVIDER . $get_with_lowercase_keys["channel"];
+$responseJson = $memcache->get($requestCacheKey);
 
-if (!isset($getChannel)) {
-    $responseJson = $memcache->get($requestCacheKey);
-}
 
-if (!isset($responseJson) || $responseJson === false) {
+if ($responseJson === false) {
 
     ini_set('default_socket_timeout', 5);
 
@@ -122,10 +121,16 @@ if (!isset($responseJson) || $responseJson === false) {
     } else {
         if (array_key_exists($getChannel, $CHANNELS)) {
             $responses = channelResponse($CHANNELS[$getChannel]);
+        } else if (strpos($getChannel, "|")) {
+            $requestChannels = explode("|", $getChannel);
+
+            foreach ($requestChannels as $channel) {
+                $responses[$channel] = channelResponse($CHANNELS[$channel]);
+            }
         }
     }
 
-    if (count($responses)) {
+    if ($responses) {
         $responseJson = json_encode($responses);
         $memcache->set($requestCacheKey, $responseJson, MEMCACHE_COMPRESSED, EXPIRY);
     }
