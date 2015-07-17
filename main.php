@@ -2,6 +2,8 @@
 
 define("CACHE_KEY", "durianclubpodcast");
 define("EXPIRY", 86400);
+define("LONG_EXPIRY", 604800);
+define("CHANNEL_QUERYSTRING", "channel");
 $CHANNELS = [
     "durianclub" => [
         "name" => "Durian Club",
@@ -18,15 +20,22 @@ $CHANNELS = [
         "startTime" => "1930"
     ]
 ];
-
+$get_with_lowercase_keys = array_combine(
+    array_map("strtolower", array_keys($_GET)),
+    array_values($_GET)
+);
 $memcache = new Memcache;
-//$memcache->delete(CACHE_KEY);
+$getChannel = $get_with_lowercase_keys["channel"];
+$requestCacheKey = CACHE_KEY . $get_with_lowercase_keys["channel"];
 
-$responseJson = $memcache->get(CACHE_KEY);
+if (!isset($getChannel)) {
+    $responseJson = $memcache->get($requestCacheKey);
+}
 
-if ($responseJson === false) {
+if (!isset($responseJson) || $responseJson === false) {
 
-    ini_set('default_socket_timeout', 2);
+    ini_set('default_socket_timeout', 5);
+
 
     function transformChannel(DateTime $date, array $hash)
     {
@@ -38,14 +47,27 @@ if ($responseJson === false) {
             $year,
             $month,
             $day,
-            $hash["startTime"]
+            $hash["startTime"],
+            $year .
+            $month .
+            $day .
+            $hash["startTime"],
+        ];
+    }
+
+    function constructPodcast(DateTime $dateTime, $url)
+    {
+        return [
+            "date" => $dateTime->format("D d M Y"),
+            "m4a" => $url
         ];
     }
 
     function channelResponse(array $hash)
     {
-        $urlTemplate = "http://media.emit.com/%s/chinese/%s%s%s%s/aac_mid.m4a";
-
+        global $memcache;
+//        $urlTemplate = "http://media.emit.com/%s/chinese/%s%s%s%s/aac_mid.m4a";
+        $urlTemplate = "http://emit-media-production.s3.amazonaws.com/%s/chinese/%s/%s/%s/%s/%s_chinese_64.m4a";
         if (array_key_exists("day", $hash)) {
             $date = new DateTime('@' . strtotime("previous " . $hash["day"]));
         } else {
@@ -53,18 +75,33 @@ if ($responseJson === false) {
         }
         $podcasts = [];
 
+
         for ($i = 0; $i < 5; $i++) {
             $currDate = $date->modify("-$i week");
             $url = vsprintf($urlTemplate, transformChannel($currDate, $hash));
-            $headers = get_headers($url, 1);
-            if (strpos(implode("", $headers), "200 OK") !== false) {
-                $podcasts[] = [
-                    "date" => $currDate->format("D d M Y"),
-                    "m4a" => $url
+            $cacheKey = base64_encode($url);
+            $cachedUrl = $memcache->get($cacheKey);
+
+            if ($cachedUrl === false) {
+                $context = [
+                    "http" => [
+                        "method" => "HEAD",
+                        "follow_location" => 0
+                    ]
                 ];
-            } else {
-                continue;
+                $context = stream_context_create($context);
+                $response = file_get_contents($url, false, $context);
+                $httpCode = 404;
+                if (!empty($http_response_header)) {
+                    sscanf($http_response_header[0], 'HTTP/%*d.%*d %d', $httpCode);
+                }
+                if ($httpCode == 200) {
+                    $memcache->set($cacheKey, $url, MEMCACHE_COMPRESSED, LONG_EXPIRY);
+                } else {
+                    continue;
+                }
             }
+            $podcasts[] = constructPodcast($currDate, $url);
         }
 
         return [
@@ -75,12 +112,23 @@ if ($responseJson === false) {
     }
 
     $responses = [];
-    foreach ($CHANNELS as $key => $value) {
-        $responses[$key] = channelResponse($value);
-    }
-    $responseJson = json_encode($responses);
 
-    $memcache->set(CACHE_KEY, $responseJson);
+    if (!isset($getChannel)) {
+        foreach ($CHANNELS as $key => $value) {
+            $responses[$key] = channelResponse($value);
+        }
+
+
+    } else {
+        if (array_key_exists($getChannel, $CHANNELS)) {
+            $responses = channelResponse($CHANNELS[$getChannel]);
+        }
+    }
+
+    if (count($responses)) {
+        $responseJson = json_encode($responses);
+        $memcache->set($requestCacheKey, $responseJson, MEMCACHE_COMPRESSED, EXPIRY);
+    }
 
 }
 
@@ -113,14 +161,16 @@ function is_valid_callback($subject)
     && !in_array(mb_strtolower($subject, 'UTF-8'), $reserved_words);
 }
 
+if ($responseJson) {
+    # JSON if no callback
+    if (!isset($_GET['callback']))
+        exit($responseJson);
 
-# JSON if no callback
-if (!isset($_GET['callback']))
-    exit($responseJson);
+    # JSONP if valid callback
+    if (is_valid_callback($_GET['callback']))
+        exit("{$_GET['callback']}($responseJson)");
+}
 
-# JSONP if valid callback
-if (is_valid_callback($_GET['callback']))
-    exit("{$_GET['callback']}($responseJson)");
 
 // # Otherwise, bad request
 header('status: 400 Bad Request', true, 400);
