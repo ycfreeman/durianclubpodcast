@@ -75,8 +75,8 @@ if ($responseJson === false) {
         $podcasts = [];
 
 
-        for ($i = 0; $i < 5; $i++) {
-            $currDate = $date->modify("-$i week");
+        for ($i = 0; $i < 15; $i++) {
+            $currDate = $date->modify("-1 week");
             $url = vsprintf($urlTemplate, transformChannel($currDate, $hash));
             $cacheKey = base64_encode($url);
             $cachedUrl = $memcache->get($cacheKey);
