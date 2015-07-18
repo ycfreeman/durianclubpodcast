@@ -68,16 +68,18 @@ if ($responseJson === false) {
 //        $urlTemplate = "http://media.emit.com/%s/chinese/%s%s%s%s/aac_mid.m4a";
         $urlTemplate = "http://emit-media-production.s3.amazonaws.com/%s/chinese/%s/%s/%s/%s/%s_chinese_64.m4a";
         if (array_key_exists("day", $hash)) {
-            $date = new DateTime('@' . strtotime("previous " . $hash["day"]));
+            $date = new DateTime('@' . strtotime("this " . $hash["day"]));
+            if ($date >= new DateTime('now')) {
+                $date->modify('-1 week');
+            }
         } else {
-            $date = new DateTime();
+            $date = new DateTime('now');
         }
         $podcasts = [];
 
 
         for ($i = 0; $i < 15; $i++) {
-            $currDate = $date->modify("-1 week");
-            $url = vsprintf($urlTemplate, transformChannel($currDate, $hash));
+            $url = vsprintf($urlTemplate, transformChannel($date, $hash));
             $cacheKey = base64_encode($url);
             $cachedUrl = $memcache->get($cacheKey);
 
@@ -100,7 +102,8 @@ if ($responseJson === false) {
                     continue;
                 }
             }
-            $podcasts[] = constructPodcast($currDate, $url);
+            $podcasts[] = constructPodcast($date, $url);
+            $date->modify("-1 week");
         }
 
         return [
