@@ -189,5 +189,9 @@ function getResponses($getChannel)
         }
     }
 
+    usort($responses, function($a,$b) {
+        return strtotime($b['pubDate'])-strtotime($a['pubDate']);
+    });
+
     return $responses;
 }
