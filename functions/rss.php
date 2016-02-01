@@ -38,6 +38,7 @@ if ($responseFeed === false){
 }
 
 if ($responseFeed) {
+    header("Access-Control-Allow-Origin: *");
     header('Content-Type: text/xml');
     exit($responseFeed);
 }
