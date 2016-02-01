@@ -1,0 +1,5 @@
+{
+    "require": {
+        "mibe/FeedWriter": "^1.0"
+    }
+}
