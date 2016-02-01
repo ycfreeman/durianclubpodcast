@@ -8,6 +8,7 @@ define('EXPIRY', 86400);
 define('LONG_EXPIRY', 604800);
 define('CHANNEL_QUERYSTRING', 'channel');
 define('DIVIDER', '___');
+ini_set('default_socket_timeout', 5);
 
 $get_with_lowercase_keys = array_combine(
     array_map('strtolower', array_keys($_GET)),

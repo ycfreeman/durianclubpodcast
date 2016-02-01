@@ -6,7 +6,6 @@ $responseCacheKey = $requestCacheKey . DIVIDER . 'json';
 $responseJson = $memcache->get($responseCacheKey);
 
 if ($responseJson === false) {
-    ini_set('default_socket_timeout', 5);
 
     $responses = getResponses($getChannel);
 

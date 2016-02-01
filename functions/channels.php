@@ -89,10 +89,13 @@ function getResponses($getChannel)
         ];
     }
 
-    function constructPodcast(DateTime $dateTime, $url, $length)
+    function constructPodcast(DateTime $dateTime, $url, $length, $name)
     {
+        $formattedDateTime = $dateTime->format('D d M Y');
+
         return [
-            'date' => $dateTime->format('D d M Y'),
+            'title' => $name . ' - ' . $formattedDateTime,
+            'date' => $formattedDateTime,
             'm4a' => $url,
             'length' => $length
         ];
@@ -122,7 +125,7 @@ function getResponses($getChannel)
 
         for ($i = 0; $i < 15; $i++) {
             $url = vsprintf($urlTemplate, urlHelper($date, $hash));
-            if ($url === $podcasts[$i - 1]->m4a) {
+            if ($url === $podcasts[$i - 1]['m4a']) {
                 continue;
             }
             $cacheKey = base64_encode($url);
@@ -147,7 +150,7 @@ function getResponses($getChannel)
                     $length = $responseHeaders['content-length'];
                 }
                 if ($httpCode == 200) {
-                    $podcast = constructPodcast($date, $url, $length);
+                    $podcast = constructPodcast($date, $url, $length, $hash['otherName']);
                     $memcache->set($cacheKey, $podcast, MEMCACHE_COMPRESSED, LONG_EXPIRY);
                 } else {
                     // we cache as well if link is not found
@@ -160,11 +163,7 @@ function getResponses($getChannel)
             $date->modify($decrementString);
         }
 
-        return [
-            'name' => $hash['name'],
-            'otherName' => $hash['otherName'],
-            'podcasts' => $podcasts
-        ];
+        return $podcasts;
     }
 
 
@@ -174,17 +173,17 @@ function getResponses($getChannel)
 
     if (!isset($getChannel)) {
         foreach ($CHANNELS as $key => $value) {
-            $responses[$key] = channelResponse($value);
+            $responses = array_merge($responses, channelResponse($value));
         }
     } else {
         if (strpos($getChannel, '|')) {
             $requestChannels = explode('|', $getChannel);
 
             foreach ($requestChannels as $channel) {
-                $responses[$channel] = channelResponse($CHANNELS[$channel]);
+                $responses = array_merge($responses, channelResponse($CHANNELS[$channel]));
             }
         } else if (array_key_exists($getChannel, $CHANNELS)) {
-            $responses = channelResponse($CHANNELS[$getChannel]);
+            $responses = array_merge($responses, channelResponse($CHANNELS[$getChannel]));
         }
     }
 
