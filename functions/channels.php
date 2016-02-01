@@ -25,7 +25,7 @@ $CHANNELS = [
         'name' => 'Saturday talk',
         'otherName' => '十方漫談',
         'channel' => '4eb',
-        'dayString' => 'first saturday of this month',
+        'dayString' => 'first saturday of this month UTC2000',
         'startTime' => '2000'
     ],
     'sundaymorning' => [
@@ -92,12 +92,14 @@ function getResponses($getChannel)
     function constructPodcast(DateTime $dateTime, $url, $length, $name)
     {
         $formattedDateTime = $dateTime->format('D d M Y');
+        $formattedPubTime = $dateTime->format('D d M Y H:i:s');
 
         return [
             'title' => $name . ' - ' . $formattedDateTime,
             'date' => $formattedDateTime,
             'm4a' => $url,
-            'length' => $length
+            'length' => $length,
+            'pubDate' => $formattedPubTime
         ];
     }
 
@@ -108,7 +110,7 @@ function getResponses($getChannel)
         $urlTemplate = 'http://emit-media-production.s3.amazonaws.com/%s/chinese/%s/%s/%s/%s/%s_chinese_64.m4a';
         $decrementString = '-1 week';
         if (array_key_exists('day', $hash)) {
-            $date = new DateTime('@' . strtotime('this ' . $hash['day']));
+            $date = new DateTime('@' . strtotime('this ' . $hash['day'] . 'UTC'. $hash['startTime']));
             if ($date >= (new DateTime('now'))->modify('-1 day')) {
                 $date->modify('-1 week');
             }
