@@ -16,6 +16,6 @@
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $file = 'main.php';
 
-$q = array_map('strtolower',array_map('urldecode', explode('/', $path)));
+$q = array_map('strtolower', array_map('rawurldecode', explode('/', $path)));
 
 require $file;
