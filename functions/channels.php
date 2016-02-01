@@ -101,7 +101,7 @@ function getResponses($getChannel)
         ];
     }
 
-    function channelResponse(array $hash)
+    function channelResponse(array $hash, $rows = 15)
     {
         global $memcache;
 //        $urlTemplate = 'http://media.emit.com/%s/chinese/%s%s%s%s/aac_mid.m4a';
@@ -123,7 +123,7 @@ function getResponses($getChannel)
         }
         $podcasts = [];
 
-        for ($i = 0; $i < 15; $i++) {
+        for ($i = 0; $i < $rows; $i++) {
             $url = vsprintf($urlTemplate, urlHelper($date, $hash));
             if ($url === $podcasts[$i - 1]['m4a']) {
                 continue;
@@ -173,7 +173,7 @@ function getResponses($getChannel)
 
     if (empty($getChannel)) {
         foreach ($CHANNELS as $key => $value) {
-            $responses = array_merge($responses, channelResponse($value));
+            $responses = array_merge($responses, channelResponse($value, 1));
         }
     } else {
         if (strpos($getChannel, '_')) {
