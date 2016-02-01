@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * usage:
+ * http://durianclubpodcast.appspot.com/{type}/{underscore separated channels}
+ * e.g.
+ * http://durianclubpodcast.appsport.com/rss/durianclub_digitalchat
+ */
+
+
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/functions/channels.php';
 

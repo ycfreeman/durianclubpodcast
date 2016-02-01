@@ -176,8 +176,8 @@ function getResponses($getChannel)
             $responses = array_merge($responses, channelResponse($value));
         }
     } else {
-        if (strpos($getChannel, '+')) {
-            $requestChannels = explode('+', $getChannel);
+        if (strpos($getChannel, '_')) {
+            $requestChannels = explode('_', $getChannel);
 
             foreach ($requestChannels as $channel) {
                 $responses = array_merge($responses, channelResponse($CHANNELS[$channel]));
