@@ -19,8 +19,8 @@ define('DIVIDER', '___');
 ini_set('default_socket_timeout', 5);
 
 $memcache = new Memcache;
-$getChannel = $q[2];
-$requestCacheKey = $q[2];
+$getChannel = $q[2] ?: '';
+$requestCacheKey = $q[2] ?: '';
 $responseType = $q[1] ?: 'json';
 
 if ($responseType === 'json') {

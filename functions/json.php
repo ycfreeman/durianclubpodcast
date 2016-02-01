@@ -1,6 +1,7 @@
 <?php
 
 global $getChannel;
+global $requestCacheKey;
 
 $responseCacheKey = $requestCacheKey . DIVIDER . 'json';
 $responseJson = $memcache->get($responseCacheKey);

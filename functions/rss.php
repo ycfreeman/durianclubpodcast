@@ -1,6 +1,8 @@
 <?php
 
 global $getChannel;
+global $requestCacheKey;
+
 
 date_default_timezone_set('UTC');
 

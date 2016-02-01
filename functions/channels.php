@@ -171,7 +171,7 @@ function getResponses($getChannel)
 
     $responses = [];
 
-    if (!isset($getChannel)) {
+    if (empty($getChannel)) {
         foreach ($CHANNELS as $key => $value) {
             $responses = array_merge($responses, channelResponse($value));
         }
