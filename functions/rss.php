@@ -25,7 +25,7 @@ if ($responseFeed === false){
             $newItem->setTitle($podcast['title']);
             $newItem->setLink($podcast['m4a']);
             $newItem->setDescription(($podcast['title']));
-            $newItem->addEnclosure($podcast['m4a'], $podcast['length'], 'audio/mp4');
+            $newItem->addEnclosure($podcast['m4a'], $podcast['length'], 'audio/mpeg');
             $feed->addItem($newItem);
         }
     }
