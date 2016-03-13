@@ -30,7 +30,7 @@ $CHANNELS = [
     ],
     'sundaymorning' => [
         'name' => 'Good Morning Sunday!',
-        'otherName' => '早晨星期日!',
+        'otherName' => '星期日早晨',
         'channel' => '4eb',
         'day' => 'sunday',
         'startTime' => '1015'
