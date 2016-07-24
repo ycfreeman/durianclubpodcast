@@ -80,10 +80,14 @@ $CHANNELS = [
     ]
 ];
 
-function getWeekOfMonth(DateTime $date)
-{
+function getWeekOfMonth(DateTime $date) {
     $firstDayOfMonth = new DateTime($date->format('Y-m-1'));
     return ceil((intval($firstDayOfMonth->format('N')) + intval($date->format('j')) - 1) / 7);
+}
+
+function getChannel($channel){
+    global $CHANNELS;
+    return $CHANNELS[$channel];
 }
 
 function getResponses($getChannel)
