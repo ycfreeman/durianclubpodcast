@@ -15,11 +15,11 @@ if ($responseFeed === false){
     $feed = new RSS2;
 
     $channel = getChannel($getChannel);
-    $channelTitle = '4eb Chinese - '. $channel['name'].' - '.$channel['otherName'];
+    $channelTitle = 'Radio 4eb Chinese - '. $channel['name'].' - '.$channel['otherName'];
 
-    $feed->setTitle($getChannel ? $channelTitle : "4eb Chinese - All Channels");
+    $feed->setTitle($getChannel ? $channelTitle : "Radio 4eb Chinese - All Channels");
     $feed->setLink("$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
-    $feed->setDescription($getChannel ? $channelTitle : "4eb Chinese - All Channels");
+    $feed->setDescription($getChannel ? $channelTitle : "Radio 4eb Chinese - All Channels");
 
     // construct feed here
     $responses = getResponses($getChannel);
