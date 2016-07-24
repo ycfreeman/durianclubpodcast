@@ -1,4 +1,7 @@
 <?php
+/**
+ * weeksOfMonth = comma separated 1-5
+ */
 $CHANNELS = [
     'durianclub' => [
         'name' => 'Durian Club',
@@ -25,7 +28,16 @@ $CHANNELS = [
         'name' => 'Saturday talk',
         'otherName' => '十方漫談',
         'channel' => '4eb',
-        'dayString' => 'first saturday of this month UTC2000',
+        'day' => 'saturday',
+        'weeksOfMonth' => '1',
+        'startTime' => '2000'
+    ],
+    'bristarry' => [
+        'name' => 'Bristarry Night',
+        'otherName' => '布一樣的星空',
+        'channel' => '4eb',
+        'day' => 'saturday',
+        'weeksOfMonth' => '2,3,4,5',
         'startTime' => '2000'
     ],
     'sundaymorning' => [
@@ -35,11 +47,28 @@ $CHANNELS = [
         'day' => 'sunday',
         'startTime' => '1015'
     ],
-    'sundayafternoon' => [
+    'trend' => [
         'name' => 'Sunday Afternoon',
-        'otherName' => '客座新潮流/午後的布村',
+        'otherName' => '客座新潮流',
         'channel' => '4eb',
         'day' => 'sunday',
+        'weeksOfMonth' => '1,2,3',
+        'startTime' => '1515'
+    ],
+    'brisafternoon' => [
+        'name' => 'Sunday Afternoon',
+        'otherName' => '午後的布村',
+        'channel' => '4eb',
+        'day' => 'sunday',
+        'weeksOfMonth' => '4',
+        'startTime' => '1515'
+    ],
+    'classic' => [
+        'name' => 'Sunday Afternoon',
+        'otherName' => '經典一刻',
+        'channel' => '4eb',
+        'day' => 'sunday',
+        'weeksOfMonth' => '5',
         'startTime' => '1515'
     ],
     'lalaland' => [
@@ -51,6 +80,11 @@ $CHANNELS = [
     ]
 ];
 
+function getWeekOfMonth(DateTime $date)
+{
+    $firstDayOfMonth = new DateTime($date->format('Y-m-1'));
+    return ceil((intval($firstDayOfMonth->format('N')) + intval($date->format('j')) - 1) / 7);
+}
 
 function getResponses($getChannel)
 {
@@ -114,22 +148,24 @@ function getResponses($getChannel)
             if ($date >= (new DateTime('now'))->modify('-1 day')) {
                 $date->modify('-1 week');
             }
-        } else if (array_key_exists('dayString', $hash)) {
-            $date = new DateTime('@' . strtotime($hash['dayString']));
-            if ($date >= (new DateTime('now'))->modify('-1 day')) {
-                $date = new DateTime('@' . strtotime(str_replace('this', 'last', $hash['dayString'])));
-            }
-            $decrementString = str_replace('this', 'last', $hash['dayString']);
         } else {
             $date = new DateTime('now');
         }
+
+        if (array_key_exists('weeksOfMonth', $hash)) {
+            $weeksOfMonth = explode(',', $hash['weeksOfMonth']);
+        }
+
         $podcasts = [];
 
         for ($i = 0; $i < $rows; $i++) {
             $url = vsprintf($urlTemplate, urlHelper($date, $hash));
-            if ($url === $podcasts[$i - 1]['m4a']) {
+            if ($url === $podcasts[$i - 1]['m4a']
+                || (isset($weeksOfMonth) && !in_array(getWeekOfMonth($date), $weeksOfMonth))) {
+                $date->modify($decrementString);
                 continue;
             }
+
             $cacheKey = base64_encode($url);
             $podcast = $memcache->get($cacheKey);
 
@@ -159,9 +195,11 @@ function getResponses($getChannel)
                     $memcache->set($cacheKey, '', MEMCACHE_COMPRESSED, LONG_EXPIRY);
                 }
             }
+
             if ($podcast) {
                 $podcasts[] = $podcast;
             }
+
             $date->modify($decrementString);
         }
 
