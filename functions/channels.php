@@ -15,7 +15,7 @@ $CHANNELS = [
         'otherName' => '數碼講',
         'channel' => '4eb-d',
         'day' => 'saturday',
-        'startTime' => '1930'
+        'startTime' => '2000'
     ],
     'caferhapsody' => [
         'name' => 'Café Rhapsody',
