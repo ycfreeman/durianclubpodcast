@@ -23,8 +23,14 @@ $getChannel = $q[2] ?: '';
 $requestCacheKey = $q[2] ?: '';
 $responseType = $q[1] ?: 'json';
 
-if ($responseType === 'json') {
-    require __DIR__ . '/functions/json.php';
-} else if ($responseType === 'rss') {
-    require __DIR__ . '/functions/rss.php';
+switch ($responseType) {
+    case 'json':
+        require __DIR__ . '/functions/json.php';
+        return;
+    case 'rss':
+        require __DIR__ . '/functions/rss.php';
+        return;
+    case 'atom':
+        require __DIR__ . '/functions/atom.php';
+        return;
 }
