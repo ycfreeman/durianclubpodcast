@@ -8,7 +8,7 @@ $CHANNELS = [
         'otherName' => '榴槤俱樂部',
         'channel' => '4eb',
         'day' => 'saturday',
-        'startTime' => '2230'
+        'startTime' => '2300'
     ],
     'digitalchat' => [
         'name' => 'Digital Chat',
@@ -17,60 +17,52 @@ $CHANNELS = [
         'day' => 'saturday',
         'startTime' => '2000'
     ],
-    'caferhapsody' => [
-        'name' => 'Café Rhapsody',
-        'otherName' => '咖啡狂想曲',
-        'channel' => '4eb',
-        'day' => 'friday',
-        'startTime' => '2245'
-    ],
-    'saturday8' => [
-        'name' => 'Saturday talk',
-        'otherName' => '十方漫談',
-        'channel' => '4eb',
-        'day' => 'saturday',
-        'weeksOfMonth' => '1',
-        'startTime' => '2000'
-    ],
+    // 'saturday8' => [
+    //     'name' => 'Saturday talk',
+    //     'otherName' => '十方漫談',
+    //     'channel' => '4eb',
+    //     'day' => 'saturday',
+    //     'weeksOfMonth' => '1',
+    //     'startTime' => '2000'
+    // ],
     'bristarry' => [
         'name' => 'Bristarry Night',
         'otherName' => '布一樣的星空',
         'channel' => '4eb',
         'day' => 'saturday',
-        'weeksOfMonth' => '2,3,4,5',
         'startTime' => '2000'
     ],
-    'sundaymorning' => [
-        'name' => 'Good Morning Sunday!',
-        'otherName' => '星期日早晨',
-        'channel' => '4eb',
-        'day' => 'sunday',
-        'startTime' => '1015'
-    ],
-    'trend' => [
-        'name' => 'Sunday Afternoon',
-        'otherName' => '客座新潮流',
-        'channel' => '4eb',
-        'day' => 'sunday',
-        'weeksOfMonth' => '1,2,3',
-        'startTime' => '1515'
-    ],
-    'brisafternoon' => [
-        'name' => 'Sunday Afternoon',
-        'otherName' => '午後的布村',
-        'channel' => '4eb',
-        'day' => 'sunday',
-        'weeksOfMonth' => '4',
-        'startTime' => '1515'
-    ],
-    'classic' => [
-        'name' => 'Sunday Afternoon',
-        'otherName' => '經典一刻',
-        'channel' => '4eb',
-        'day' => 'sunday',
-        'weeksOfMonth' => '5',
-        'startTime' => '1515'
-    ],
+    // 'sundaymorning' => [
+    //     'name' => 'Good Morning Sunday!',
+    //     'otherName' => '星期日早晨',
+    //     'channel' => '4eb',
+    //     'day' => 'sunday',
+    //     'startTime' => '1015'
+    // ],
+    // 'trend' => [
+    //     'name' => 'Sunday Afternoon',
+    //     'otherName' => '客座新潮流',
+    //     'channel' => '4eb',
+    //     'day' => 'sunday',
+    //     'weeksOfMonth' => '1,2,3',
+    //     'startTime' => '1515'
+    // ],
+    // 'brisafternoon' => [
+    //     'name' => 'Sunday Afternoon',
+    //     'otherName' => '午後的布村',
+    //     'channel' => '4eb',
+    //     'day' => 'sunday',
+    //     'weeksOfMonth' => '4',
+    //     'startTime' => '1515'
+    // ],
+    // 'classic' => [
+    //     'name' => 'Sunday Afternoon',
+    //     'otherName' => '經典一刻',
+    //     'channel' => '4eb',
+    //     'day' => 'sunday',
+    //     'weeksOfMonth' => '5',
+    //     'startTime' => '1515'
+    // ],
     'lalaland' => [
         'name' => 'Lala-Land',
         'otherName' => '啦啦世界',
